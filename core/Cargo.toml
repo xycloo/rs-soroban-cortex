@@ -1,0 +1,11 @@
+[package]
+name = "core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+soroban-sdk = { workspace = true }
+bytes = { workspace = true }
+
+[dev_dependencies]
+soroban-sdk = { workspace = true, features=["testutils"] }
