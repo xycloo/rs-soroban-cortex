@@ -1,6 +1,9 @@
 [workspace]
 resolver = "2"
-members = [ "core" ]
+members = [ 
+    "core",
+    "soroban" 
+    ]
 
 [workspace.package]
 version = "0.1.0"
@@ -26,3 +29,13 @@ version = "0.8.4"
 
 [workspace.dependencies.bytes]
 version = "1"
+
+
+[workspace.dependencies.soroban-env-host]
+version = "0.0.16"
+git = "https://github.com/stellar/rs-soroban-env"
+rev = "0c0cae6fa22b751e7fd95d7ce7556ac6d7b7010e"
+
+
+[workspace.dependencies]
+stellar-strkey = "0.0.7"

@@ -3,9 +3,19 @@ name = "core"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-soroban-sdk = { workspace = true }
-bytes = { workspace = true }
 
-[dev_dependencies]
-soroban-sdk = { workspace = true, features=["testutils"] }
+[dependencies]
+#soroban-sdk = { workspace = true }
+bytes = { workspace = true }
+stellar-strkey = { workspace = true }    
+soroban-env-host = { workspace = true }    
+serde = "1.0.82"
+serde-aux = "4.1.2"
+soroban-cli= { git = "https://github.com/stellar/soroban-tools/", rev="6bdd01a190e30805955fba11c60eed4aa452387c"}
+ed25519-dalek = "1.0.1"
+tokio = { version = "1", features = ["full"] }
+tokio-test = "0.4.2"
+async-trait = "0.1.68"
+log = "0.4.19"
+env_logger = "0.10.0"
+chrono = "0.4.26"
