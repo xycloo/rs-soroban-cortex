@@ -1,10 +1,8 @@
 #![no_std]
 
-use soroban_sdk::{contractimpl, Env, BytesN, Address};
+mod contract;
+mod types;
+mod storage;
 
-pub struct Contract;
-
-#[contractimpl]
-impl Contract {
-    pub fn oracle_set(env: Env, payload: BytesN<80>) {}
-}
+#[cfg(test)]
+mod test;
