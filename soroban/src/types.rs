@@ -9,6 +9,9 @@ pub(crate) type Hash = BytesN<32>;
 #[contracterror]
 pub enum Error {
     NodeIdDoesntExist = 0,
+    NotEnoughNodes = 1,
+    InvalidPreimage = 2,
+    VoteDoesntFitRatio = 3,
 }
 
 #[contracttype]
@@ -16,15 +19,35 @@ pub struct Bridged(pub Address, pub Hash);
 
 #[contracttype]
 pub(crate) enum DataKey {
+    Settings,
     Nodes,
     NodeSlot(Address),
     Bridged(Bridged)
 }
 
-
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
 #[contracttype]
-pub(crate) struct LockedOutBridge {
+pub(crate) struct Settings {
+    /// minimum number of nodes which have provided at least the correct hash.
+    /// the nodes who have provided another hash will still enter storage but under
+    /// a different entry slot, and won't have enough [`minimum_participating`] nodes
+    /// for their locked balance to be collected.
+    pub minimum_participating_nodes: u32,
+    
+    pub minimum_approve_ratio: u32
+}
+
+impl Settings {
+    pub(crate) fn new(minimum_participating_nodes: u32, minimum_approve_ratio: u32) -> Self {
+        Self { 
+            minimum_participating_nodes, 
+            minimum_approve_ratio 
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Debug)]
+#[contracttype]
+pub struct LockedOutBridge {
     hash: Hash,
     recipient: Address,
     amount: i128,
