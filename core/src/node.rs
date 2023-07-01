@@ -76,24 +76,30 @@ impl LockedInBridge {
     }
 }
 
+pub enum NodeError {
+    Conversion
+}
+
+pub trait TryIntoMessage {
+    fn try_into(self) -> Result<[u8; 80], NodeError>;
+}
 
 #[async_trait]
-pub trait EventLogger<I>: Sync + Send {
-    fn new(contract_address: &[u8]) -> Self
+pub trait EventLogger<I>: Sync + Send { // TODO: probably rename
+    // TODO: possibly remove this method
+    fn new(contract_address: &[u8]) -> Self // TODO: probably remove params as the implementor
+                                            // will always need to put their own logic.
         where Self: Sized;
     async fn read_stream(&self, poll_interval: std::time::Duration) -> Pin<Box<(dyn Stream<Item = I> + std::marker::Send + 'static)>>;
 }
 
-pub struct LogRaw {
-    pub data: Vec<u8>
-}
 
 pub mod test_listener_eth {
     use std::pin::Pin;
 
     use async_trait::async_trait;
     use web3::types::Filter;
-    use super::{EventLogger, LogRaw};
+    use super::{EventLogger};
     use web3::futures::StreamExt;
 
     #[derive(Clone)]
@@ -129,15 +135,15 @@ pub mod test_listener_eth {
     }
 
     // TODO: function that parses `data` to `bytes` to be deserialized into the ['LockedInBridge'] object.
-    impl From<web3::types::Log> for LogRaw { // potentially change to From<...> for `LockedInBridge`.
-        fn from(value: web3::types::Log) -> Self {
-            Self { data: value.data.0.to_vec() }
-        }
-    }
+    // impl From<web3::types::Log> for LogRaw { // potentially change to From<...> for `LockedInBridge`.
+        // fn from(value: web3::types::Log) -> Self {
+            // Self { data: value.data.0.to_vec() }
+        // }
+    // }
 }
 
 pub struct Node<'a, I> 
-    where I: std::marker::Send, LogRaw: From<I>
+    where I: std::marker::Send
     
     {
     // events in the latest
@@ -161,7 +167,7 @@ pub trait EventProcessor<I> {
 // Implement the trait for Node
 #[async_trait]
 impl<'a, I: std::marker::Send> EventProcessor<I> for Node<'a, I>
-    where LogRaw: From<I>
+    where I: TryIntoMessage
     
     {
 
@@ -171,8 +177,21 @@ impl<'a, I: std::marker::Send> EventProcessor<I> for Node<'a, I>
 
         
         // Implementation
-        // let LogRaw { data } = stream_item.await.unwrap().into();
-        // let event = LockedInBridge::deserialize_from_bytes(bytes);
+
+        // TODO: error checking
+        // leave up to the implementor if node is
+        // strict or permissive:
+        // strict: any event that can't be converted
+        // i.e an event from another action will be reported
+        // in the errors log.
+        // permissive: any event that can't be converted
+        // will be ignored.
+        if let Ok(bytes) = stream_item.await.unwrap().try_into() {
+            let event = LockedInBridge::deserialize_from_bytes(bytes);
+            self.in_events_queue.lock().unwrap().push(event);
+        };
+
+        
 
         // Test implementation
         let address = stellar_strkey::ed25519::PublicKey::from_string("GAICVK2SYRLD7YFKD3D2TZGKAB6NH34VP4NW2ZYEEQHLLZOQIVC5VXEL").unwrap();
@@ -217,7 +236,7 @@ impl<'a, I: std::marker::Send> EventProcessor<I> for Node<'a, I>
 }
 
 impl<'a, I: Send> Node<'a, I>
-    where LogRaw: From<I>
+    where I: TryIntoMessage
     {
     /// Sets the initial parameters of the node and configurates the object.    
     pub fn new(node_secret: &'a str, out_contract: Bytes32, stellar_rpc_endpoint: &'a str, txload_function: &'a str, network_passphrase: &'a str, listener: impl EventLogger<I> + 'static) -> Self {

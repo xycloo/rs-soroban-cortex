@@ -1,8 +1,9 @@
 [package]
-name = "multichain-core"
+name = "ethereum"
 version = "0.1.0"
 edition = "2021"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 bytes = { workspace = true }
@@ -18,9 +19,4 @@ futures = { workspace = true }
 chrono = { workspace = true }
 async-trait = { workspace = true }
 
-serde = "1.0.82"
-serde-aux = "4.1.2"
-soroban-cli= { git = "https://github.com/stellar/soroban-tools/", rev="6bdd01a190e30805955fba11c60eed4aa452387c"}
-ed25519-dalek = "1.0.1"
-
-
+multichain-core = { workspace = true }
