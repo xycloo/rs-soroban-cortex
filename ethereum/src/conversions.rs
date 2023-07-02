@@ -1,4 +1,4 @@
-use multichain_core::node::{TryIntoMessage, NodeError};
+use multichain_core::{TryIntoMessage, NodeError};
 use web3::types::Log;
 pub struct LogWrap(pub Result<Log, web3::Error>);
 

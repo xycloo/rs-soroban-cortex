@@ -49,5 +49,6 @@ log = "0.4.19"
 env_logger = "0.10.0"
 chrono = "0.4.26"
 async-trait = "0.1.68"
+clap = "4.3.10"
 
 multichain-core = { path = "./core/" }

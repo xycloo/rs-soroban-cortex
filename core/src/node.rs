@@ -1,3 +1,31 @@
+/*
+
+Node settings:
+
+- node stellar secret [Node doesn't require a secret 
+                       for the initiating chain. The only
+                       component that will possibly need to
+                       execute operation on the initiating
+                       chain must be configured by the implementor
+                       anyway (like `EventLogger`).]
+- stellar contract address
+- stellar rpc endpoint
+- stellar network passphrase
+- function name of stellar contract fn to load oracle data
+- maximum calculated fee
+- errors logging mode:
+    * strict
+    * permissive
+
+*By the implementor:*
+- listener obect
+- Option<callback operation executor> [optionally the implementor can
+                                       setup an object that reads soroban
+                                       events and exeuctes a tx on the 
+                                       initiating chain]
+
+*/
+
 use futures::{FutureExt, Stream, StreamExt, stream::Next};
 use log::{info, debug};
 use web3::types::Filter;
@@ -5,7 +33,7 @@ use std::{sync::{Arc, Mutex}, pin::Pin};
 use tokio::time::{sleep, Duration};
 use async_trait::async_trait;
 
-use crate::rpc::NodeStellarRpcClient;
+use crate::{rpc::NodeStellarRpcClient, config::soroban::SorobanConfig};
 
 pub enum Events {
     LockedInBridge(LockedInBridge),
@@ -93,54 +121,6 @@ pub trait EventLogger<I>: Sync + Send { // TODO: probably rename
     async fn read_stream(&self, poll_interval: std::time::Duration) -> Pin<Box<(dyn Stream<Item = I> + std::marker::Send + 'static)>>;
 }
 
-
-pub mod test_listener_eth {
-    use std::pin::Pin;
-
-    use async_trait::async_trait;
-    use web3::types::Filter;
-    use super::{EventLogger};
-    use web3::futures::StreamExt;
-
-    #[derive(Clone)]
-    pub struct MyListener {
-        filter: Filter
-    }
-
-    #[async_trait]
-    impl EventLogger<std::result::Result<web3::types::Log, web3::Error>> for MyListener
-     {
-        fn new(contract_address: &[u8]) -> Self {
-            let eth_filter = web3::types::FilterBuilder::default()
-            .address(vec![web3::types::H160(contract_address.try_into().unwrap())])
-            .topics(
-                Some(vec![hex_literal::hex!(
-                    "d282f389399565f3671145f5916e51652b60eee8e5c759293a2f5771b8ddfd2e"
-                )
-                .into()]),
-                None,
-                None,
-                None,
-            )
-            .build();
-
-            Self { filter: eth_filter }
-        }
-
-        async fn read_stream(&self, poll_interval: std::time::Duration) -> Pin<Box<(dyn futures::Stream<Item = std::result::Result<web3::types::Log, web3::Error>> + Send + 'static)>> {
-            let web3 = web3::Web3::new(web3::transports::Http::new("http://localhost:8545").unwrap());
-            let filter = web3.eth_filter().create_logs_filter(self.filter.clone()).await;
-            filter.unwrap().stream(poll_interval).boxed()
-        }
-    }
-
-    // TODO: function that parses `data` to `bytes` to be deserialized into the ['LockedInBridge'] object.
-    // impl From<web3::types::Log> for LogRaw { // potentially change to From<...> for `LockedInBridge`.
-        // fn from(value: web3::types::Log) -> Self {
-            // Self { data: value.data.0.to_vec() }
-        // }
-    // }
-}
 
 pub struct Node<'a, I> 
     where I: std::marker::Send
@@ -239,13 +219,9 @@ impl<'a, I: Send> Node<'a, I>
     where I: TryIntoMessage
     {
     /// Sets the initial parameters of the node and configurates the object.    
-    pub fn new(node_secret: &'a str, out_contract: Bytes32, stellar_rpc_endpoint: &'a str, txload_function: &'a str, network_passphrase: &'a str, listener: impl EventLogger<I> + 'static) -> Self {
+    pub fn new(soroban_config: SorobanConfig<'a>, listener: impl EventLogger<I> + 'static) -> Self {
         let client = NodeStellarRpcClient::new(
-            node_secret, 
-            network_passphrase, 
-            stellar_rpc_endpoint, 
-            out_contract, 
-            txload_function
+            soroban_config
         );
         
         Self { in_events_queue: Default::default(), stellar_rpc: client, eth_listener: Box::new(listener) }
