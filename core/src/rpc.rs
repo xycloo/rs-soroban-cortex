@@ -48,7 +48,7 @@ impl<'a> NodeStellarRpcClient<'a> {
 
     /// Prepare and send the built transaction.
     /// This methods performs the appropriate checks before submitting to the Stellar Network:
-    /// - check that the calculated fees do not exceed the maximum speficied in the configs.
+    /// - check that the calculated fees do not exceed the maximum speficied when 
     pub async fn send_transaction(&self, tx: Transaction) {
         //let assembled = self.client.prepare_transaction(&tx, None).await.unwrap();
         //println!("{:?}", assembled);

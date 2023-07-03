@@ -54,7 +54,9 @@ pub struct Node<'a, I>
     /// Queued events.
     in_events_queue: Arc<Mutex<Vec<LockedInBridge>>>,
 
-    // TODO: maybe remove this wrapper and make it a trait.
+    // TODO: maybe remove this wrapper and make it a trait would make it easier
+    // for error logs reporting and 
+
     /// Wrapper around the rpc client to interact with Soroban.
     stellar_rpc: NodeStellarRpcClient<'a>,
 
