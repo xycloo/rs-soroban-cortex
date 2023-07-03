@@ -1,6 +1,6 @@
 use ed25519_dalek::Keypair;
 
-use crate::node::Bytes32;
+use crate::messaging::Bytes32;
 
 pub struct SorobanConfig<'a > {
     pub rpc_endpoint: &'a str,

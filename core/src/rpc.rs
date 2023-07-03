@@ -1,8 +1,11 @@
+//! Implements a wrapper type around the Soroban RPC client to send transactions and stream events on Soroban.
+
 use soroban_cli::{rpc::Client};
 use soroban_env_host::xdr::{ScBytes, ScVal, Transaction};
 use log::{error, info};
 use crate::{config::soroban::SorobanConfig, utils::build_invoke_contract_tx};
 
+/// Client wrapper
 pub struct NodeStellarRpcClient<'a> {
     config: SorobanConfig<'a>,
     client: Client,
@@ -10,25 +13,21 @@ pub struct NodeStellarRpcClient<'a> {
 
 
 impl<'a> NodeStellarRpcClient<'a> {
+    /// Initiate the wrapper with its configs.
     pub fn new(config: SorobanConfig<'a>) -> Self {
-        // todo: helper to create key from secret string
-        // let key = secret
-        // .parse::<Secret>()
-        // .unwrap()
-        // .key_pair(None)
-        // .unwrap();
-
-        let client = Client::new(config.rpc_endpoint).unwrap(); // todo: possibly remove rpc_endpoint from config and add it as param
+        let client = Client::new(config.rpc_endpoint).unwrap();
 
         Self { config, client }
     }
 
-    pub async fn sequence_number(&self) -> i64 {
+    /// Reads the node's account sequence number.
+    pub(crate) async fn sequence_number(&self) -> i64 {
         let public_strkey = stellar_strkey::ed25519::PublicKey(self.config.key.public.to_bytes()).to_string();
         let account_details = self.client.get_account(&public_strkey).await.unwrap();
         account_details.seq_num.into()            
     }
 
+    /// Builds the transaction used to broadcast the message.
     pub async fn build_tx(&self, payload: [u8; 80]) -> Transaction { // TODO: type alias for payload
         let config = &self.config;
         
@@ -47,6 +46,9 @@ impl<'a> NodeStellarRpcClient<'a> {
         tx
     }
 
+    /// Prepare and send the built transaction.
+    /// This methods performs the appropriate checks before submitting to the Stellar Network:
+    /// - check that the calculated fees do not exceed the maximum speficied in the configs.
     pub async fn send_transaction(&self, tx: Transaction) {
         //let assembled = self.client.prepare_transaction(&tx, None).await.unwrap();
         //println!("{:?}", assembled);
