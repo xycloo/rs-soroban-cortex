@@ -3,7 +3,6 @@ name = "multichain-core"
 version = "0.1.0"
 edition = "2021"
 
-
 [dependencies]
 bytes = { workspace = true }
 stellar-strkey = { workspace = true }    
@@ -22,5 +21,23 @@ serde = "1.0.82"
 serde-aux = "4.1.2"
 soroban-cli= { git = "https://github.com/stellar/soroban-tools/", rev="6bdd01a190e30805955fba11c60eed4aa452387c"}
 ed25519-dalek = "1.0.1"
+
+
+[features]
+
+# By default the core serves to bridge a generic chain to soroban. 
+default = ["bridge", "soroban_events_stream"]
+
+# Feature for nodes that only want to listen to events and return a stream
+stream_only = ["soroban_events_stream"]
+
+# To only have a node that listens for events, import core without `build`.
+bridge = []
+
+
+# Enables the node to listen for Soroban events.
+# Some nodes might want this deactivated to keep their functionality only 
+# to bridge a message from a generic chain to Soroban without any callback.
+soroban_events_stream = []
 
 

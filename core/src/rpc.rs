@@ -8,7 +8,9 @@ use crate::{config::soroban::SorobanConfig, utils::build_invoke_contract_tx};
 /// Client wrapper
 pub struct NodeStellarRpcClient<'a> {
     config: SorobanConfig<'a>,
-    client: Client,
+    
+    /// RPC client
+    pub client: Client,
 }
 
 

@@ -44,7 +44,9 @@ use crate::{
 
 
 
-/// Node object.
+/// Default node object.
+/// This kind of node is designed to broadcast messages from one generic chain to soroban
+/// while listening for callback events on Soroban to execute transactions on the generic chain.
 /// [`I`] is the type that is streamed from the events logger the implementor provides.
 /// ['I'] must implement [`TryIntoMessage`] for it to be serialized to bytes.
 pub struct Node<'a, I> 
@@ -56,14 +58,15 @@ pub struct Node<'a, I>
 
     // TODO: maybe remove this wrapper and make it a trait would make it easier
     // for error logs reporting and 
-
     /// Wrapper around the rpc client to interact with Soroban.
     stellar_rpc: NodeStellarRpcClient<'a>,
 
     // Ethereum event logger, supplied by implementor.
+    #[cfg(feature = "bridge")]
     eth_listener: Box<dyn EventLogger<I>>,
 
 }
+
 
 /// Describes the behaviour of processing an events stream.
 #[async_trait]
@@ -79,6 +82,7 @@ pub trait EventProcessor<I> {
 }
 
 #[async_trait]
+#[cfg(all(feature = "bridge", feature = "soroban_events_stream"))]
 impl<'a, I: std::marker::Send> EventProcessor<I> for Node<'a, I>
     where I: TryIntoMessage
     
