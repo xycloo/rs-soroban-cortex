@@ -16,7 +16,7 @@ pub struct NodeStellarRpcClient<'a> {
 
 impl<'a> NodeStellarRpcClient<'a> {
     /// Initiate the wrapper with its configs.
-    pub fn new(config: SorobanConfig<'a>) -> Self {
+    pub fn new(config: &SorobanConfig<'a>) -> Self {
         let client = Client::new(config.rpc_endpoint).unwrap();
 
         Self { config, client }

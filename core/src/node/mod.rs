@@ -29,6 +29,9 @@ pub struct Node<'a, I>
     /// Wrapper around the rpc client to interact with Soroban.
     stellar_rpc: NodeStellarRpcClient<'a>,
 
+    //#[cfg(feature = "soroban_events_stream")]
+    stellar: SorobanConfig<'a>,
+
     // Ethereum event logger, supplied by implementor.
     #[cfg(feature = "bridge")]
     eth_listener: Box<dyn EventLogger<I>>,
@@ -43,10 +46,10 @@ impl<'a, I: Send> Node<'a, I>
     /// Sets the initial parameters of the node and configurates the object.    
     pub fn new(soroban_config: SorobanConfig<'a>, listener: impl EventLogger<I> + 'static) -> Self {
         let client = NodeStellarRpcClient::new(
-            soroban_config
+            &soroban_config
         );
         
-        Self { in_events_queue: Default::default(), stellar_rpc: client, eth_listener: Box::new(listener) }
+        Self { in_events_queue: Default::default(), stellar_rpc: client, stellar: soroban_config, eth_listener: Box::new(listener) }
     }
 
     /// Runs the node.
