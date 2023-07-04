@@ -1,14 +1,15 @@
 use bytes::Bytes;
 use futures::{Stream, StreamExt, stream::Next};
 use log::{info, debug};
+use soroban_cli::rpc::Client;
 use std::{sync::{Arc, Mutex}, pin::Pin};
 use tokio::time::{sleep, Duration};
 use async_trait::async_trait;
 
 use crate::{
     rpc::NodeStellarRpcClient, 
-    config::soroban::SorobanConfig, 
-    messaging::{LockedInBridge, EventLogger, TryIntoMessage, Bytes32}, NodeError
+    config::{soroban::SorobanConfig, Config}, 
+    messaging::{LockedInBridge, EventLogger, TryIntoMessage, Bytes32}, NodeError, NodeConfiguration
 };
 
 
@@ -27,14 +28,14 @@ pub struct Node<'a, I>
     // TODO: maybe remove this wrapper and make it a trait would make it easier
     // for error logs reporting and 
     /// Wrapper around the rpc client to interact with Soroban.
-    stellar_rpc: NodeStellarRpcClient<'a>,
+    pub stellar_rpc_client: Client,
 
-    //#[cfg(feature = "soroban_events_stream")]
-    stellar: SorobanConfig<'a>,
+    /// Configurations
+    pub config: Config<'a>,
 
     // Ethereum event logger, supplied by implementor.
     #[cfg(feature = "bridge")]
-    eth_listener: Box<dyn EventLogger<I>>,
+    pub eth_listener: Box<dyn EventLogger<I>>,
 
 }
 
@@ -44,12 +45,12 @@ impl<'a, I: Send> Node<'a, I>
     {
 
     /// Sets the initial parameters of the node and configurates the object.    
-    pub fn new(soroban_config: SorobanConfig<'a>, listener: impl EventLogger<I> + 'static) -> Self {
-        let client = NodeStellarRpcClient::new(
-            &soroban_config
-        );
-        
-        Self { in_events_queue: Default::default(), stellar_rpc: client, stellar: soroban_config, eth_listener: Box::new(listener) }
+    pub fn new(soroban_config: SorobanConfig<'a>, node_config: NodeConfiguration, listener: impl EventLogger<I> + 'static) -> Self {
+        let stellar_rpc_client = Client::new(soroban_config.rpc_endpoint).unwrap(); // todo: error handling
+
+        let config = Config::new(soroban_config, node_config);
+
+        Self { in_events_queue: Default::default(), stellar_rpc_client, config, eth_listener: Box::new(listener) }
     }
 
     /// Runs the node.

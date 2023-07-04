@@ -1,9 +1,10 @@
 //! Implements a wrapper type around the Soroban RPC client to send transactions and stream events on Soroban.
 
+use async_trait::async_trait;
 use soroban_cli::{rpc::Client};
-use soroban_env_host::xdr::{ScBytes, ScVal, Transaction};
+use soroban_env_host::{xdr::{ScBytes, ScVal, Transaction}, I64Val};
 use log::{error, info};
-use crate::{config::soroban::SorobanConfig, utils::build_invoke_contract_tx};
+use crate::{config::soroban::SorobanConfig, utils::build_invoke_contract_tx, Node};
 
 /// Client wrapper
 pub struct NodeStellarRpcClient<'a> {
@@ -14,23 +15,29 @@ pub struct NodeStellarRpcClient<'a> {
 }
 
 
-impl<'a> NodeStellarRpcClient<'a> {
-    /// Initiate the wrapper with its configs.
-    pub fn new(config: &SorobanConfig<'a>) -> Self {
-        let client = Client::new(config.rpc_endpoint).unwrap();
+#[async_trait]
+pub trait SorobanRpc {
+    async fn sequence_number(&self) -> i64;
 
-        Self { config, client }
-    }
+    async fn build_tx(&self, payload: [u8; 80]) -> Transaction;
 
-    /// Reads the node's account sequence number.
-    pub(crate) async fn sequence_number(&self) -> i64 {
+    async fn send_transaction(&self, tx: Transaction);
+}
+
+
+#[async_trait]
+impl<'a, I> SorobanRpc for Node<'a, I>
+    where I: Send 
+    {
+        /// Reads the node's account sequence number.
+    async fn sequence_number(&self) -> i64 {
         let public_strkey = stellar_strkey::ed25519::PublicKey(self.config.key.public.to_bytes()).to_string();
-        let account_details = self.client.get_account(&public_strkey).await.unwrap();
+        let account_details = self.stellar_rpc_client.get_account(&public_strkey).await.unwrap();
         account_details.seq_num.into()            
     }
 
     /// Builds the transaction used to broadcast the message.
-    pub async fn build_tx(&self, payload: [u8; 80]) -> Transaction { // TODO: type alias for payload
+    async fn build_tx(&self, payload: [u8; 80]) -> Transaction { // TODO: type alias for payload
         let config = &self.config;
         
         let complete_args = vec![
@@ -51,8 +58,8 @@ impl<'a> NodeStellarRpcClient<'a> {
     /// Prepare and send the built transaction.
     /// This methods performs the appropriate checks before submitting to the Stellar Network:
     /// - check that the calculated fees do not exceed the maximum speficied when 
-    pub async fn send_transaction(&self, tx: Transaction) {
-        //let assembled = self.client.prepare_transaction(&tx, None).await.unwrap();
+    async fn send_transaction(&self, tx: Transaction) {
+        //let assembled = self.stellar_rpc_client.prepare_transaction(&tx, None).await.unwrap();
         //println!("{:?}", assembled);
 
         //let signed = utils::sign_transaction(&self.key, &assembled, &self.network_passphrase).unwrap();
@@ -60,14 +67,13 @@ impl<'a> NodeStellarRpcClient<'a> {
 
         let config = &self.config;
 
-        if let Err(error) = self.client.prepare_and_send_transaction(&tx, &config.key, config.network_passphrase, None).await {
+        if let Err(error) = self.stellar_rpc_client.prepare_and_send_transaction(&tx, &config.key, config.network_passphrase, None).await {
             error!("submitting transaction to the Stellar network returns error {}", error);
         } else {
             info!("successfully transmitted message to Soroban")
         }
     }
-}
-
+    }
 /* 
 #[test]
 fn test_tx() {
