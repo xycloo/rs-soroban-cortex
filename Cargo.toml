@@ -3,7 +3,9 @@ resolver = "2"
 members = [ 
     "core",
     "soroban",
-    "ethereum"
+    "ethereum",
+    "test_contracts/simple_log",
+    "tests"
     ]
 
 [workspace.package]
@@ -50,5 +52,5 @@ env_logger = "0.10.0"
 chrono = "0.4.26"
 async-trait = "0.1.68"
 clap = "4.3.10"
-
-multichain-core = { path = "./core/" }
+stellar-xdr = { version = "0.0.17" }
+multichain-core = { path = "./core/", default-features = false }

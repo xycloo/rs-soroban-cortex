@@ -1,43 +1,95 @@
 use futures::{Stream, StreamExt, stream::Next, TryStreamExt, TryStream};
 use log::{info, debug};
-use soroban_cli::rpc::{EventStart, EventType, Event};
+use soroban_cli::{rpc::{EventStart, EventType, Event, GetEventsResponse, Client}, commands::contract::Error};
 use std::{sync::{Arc, Mutex}, pin::Pin};
 use tokio::time::{sleep, Duration};
 use async_trait::async_trait;
+use jsonrpsee_core::{params::ObjectParams, client::ClientT};
 
 use crate::{
     rpc::NodeStellarRpcClient, 
     config::soroban::SorobanConfig, 
     messaging::{LockedInBridge, EventLogger, TryIntoMessage}, Node, NodeError
 };
-
+use jsonrpsee_http_client::{HeaderMap, HttpClient, HttpClientBuilder};
 use super::{SorobanEvent};
 
-impl<'a, I: Send> Node<'a, I>
-    where I: TryIntoMessage 
+const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
+
+fn client(url: &str) -> HttpClient {
+    let mut headers = HeaderMap::new();
+    headers.insert("X-Client-Name", "soroban-cli".parse().unwrap());
+    let version = VERSION.unwrap_or("devel");
+    headers.insert("X-Client-Version", version.parse().unwrap());
+    HttpClientBuilder::default()
+        .set_headers(headers)
+        .build(url).unwrap()
     
+}
+
+pub async fn get_events(
+    rpc_url: &str,
+    start: EventStart,
+    event_type: Option<EventType>,
+    contract_ids: &[String],
+    topics: Option<&[String]>,
+    limit: Option<usize>,
+) -> Result<GetEventsResponse, serde_json::Error> {
+    let mut filters = serde_json::Map::new();
+
+    event_type
+        .and_then(|t| match t {
+            EventType::All => None, // all is the default, so avoid incl. the param
+            EventType::Contract => Some("contract"),
+            EventType::System => Some("system"),
+        })
+        .map(|t| filters.insert("type".to_string(), t.into()));
+
+    filters.insert("topics".to_string(), topics.into());
+    filters.insert("contractIds".to_string(), contract_ids.into());
+
+    let mut pagination = serde_json::Map::new();
+    if let Some(limit) = limit {
+        pagination.insert("limit".to_string(), limit.into());
+    }
+
+    let mut oparams = ObjectParams::new();
+    match start {
+        EventStart::Ledger(l) => oparams.insert("startLedger", l.to_string())?,
+        EventStart::Cursor(c) => {
+            pagination.insert("cursor".to_string(), c.into());
+        }
+    };
+    oparams.insert("filters", vec![filters])?;
+    oparams.insert("pagination", pagination)?;
+
+    Ok(client(rpc_url).request("getEvents", oparams).await.unwrap()) // TODO: error handling
+}
+
+impl<'a> Node<'a, ()>    
     {
-        fn stream(&self, poll_interval:Duration) -> impl Stream<Item = std::vec::Vec<soroban_cli::rpc::Event>> + '_{
-            let client = &self.stellar_rpc;
+        pub fn stream(&self, poll_interval:Duration) -> impl Stream<Item = std::vec::Vec<soroban_cli::rpc::Event>> + '_{
+            let client = &self.stellar_rpc_client;
             
-            let current_ledger = self.stellar.starting_ledger;
+            let configs = self.config.soroban();
+            let current_ledger = configs.starting_ledger;
             
 
             futures::stream::unfold(current_ledger, move |current_ledger: u32| async move {
-                tokio::time::sleep(poll_interval);
+                tokio::time::sleep(poll_interval).await;
             
                 let event_start = EventStart::Ledger(current_ledger);
                 
-                let contract_id_string = stellar_strkey::Contract(self.stellar.contract_id);
-                let items = client.client.get_events(
+                let items = get_events(
+                    configs.rpc_endpoint,
                     event_start, 
                     Some(EventType::Contract), 
-                    &[contract_id_string.to_string()], 
-                    self.stellar.topics, 
+                    &[configs.contract_id.to_string()], 
+                    configs.topics, 
                     None
                 ).await.unwrap(); // TODO: error handling.
 
-                Some((items.events, items.latest_ledger))
+                Some((items.events, items.latest_ledger + 1))
             })
         }
     }

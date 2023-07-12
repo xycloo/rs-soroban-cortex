@@ -1,6 +1,8 @@
 use multichain_core::{Node, EventLogger, SorobanConfig, utils::build_key_from_secret};
 use env_logger;
 
+fn main() {}
+/* 
 #[tokio::main]
 async fn main() {
     let eth_listener = multichain_core::chains_test_types::ethereum::MyListener::new(&[0;20]);
@@ -22,3 +24,5 @@ async fn main() {
     env_logger::init();
     node.run().await;
 }
+
+*/

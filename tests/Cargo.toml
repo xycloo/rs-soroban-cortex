@@ -1,0 +1,12 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { workspace = true }
+tokio-test = { workspace = true }
+multichain-core = { path = "../core/", default-features = false, features = ["stream_only"] }
+stellar-xdr = { workspace = true, default-features = false, features=["next", "base64"] }

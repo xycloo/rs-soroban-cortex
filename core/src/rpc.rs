@@ -31,17 +31,17 @@ impl<'a, I> SorobanRpc for Node<'a, I>
     {
         /// Reads the node's account sequence number.
     async fn sequence_number(&self) -> i64 {
-        let public_strkey = stellar_strkey::ed25519::PublicKey(self.config.key.public.to_bytes()).to_string();
+        let public_strkey = stellar_strkey::ed25519::PublicKey(self.config.node().key.public.to_bytes()).to_string();
         let account_details = self.stellar_rpc_client.get_account(&public_strkey).await.unwrap();
         account_details.seq_num.into()            
     }
 
     /// Builds the transaction used to broadcast the message.
     async fn build_tx(&self, payload: [u8; 80]) -> Transaction { // TODO: type alias for payload
-        let config = &self.config;
+        let config = &self.config.node();
         
         let complete_args = vec![
-            ScVal::Bytes(ScBytes(config.contract_id.try_into().unwrap())),
+            ScVal::Bytes(ScBytes(config.aggregator_contract_id.try_into().unwrap())),
             ScVal::Symbol(
                 config.txload_function
                     .try_into()
@@ -65,7 +65,7 @@ impl<'a, I> SorobanRpc for Node<'a, I>
         //let signed = utils::sign_transaction(&self.key, &assembled, &self.network_passphrase).unwrap();
         //println!("{}", signed.to_xdr_base64().unwrap());
 
-        let config = &self.config;
+        let config = &self.config.node();
 
         if let Err(error) = self.stellar_rpc_client.prepare_and_send_transaction(&tx, &config.key, config.network_passphrase, None).await {
             error!("submitting transaction to the Stellar network returns error {}", error);
@@ -73,22 +73,4 @@ impl<'a, I> SorobanRpc for Node<'a, I>
             info!("successfully transmitted message to Soroban")
         }
     }
-    }
-/* 
-#[test]
-fn test_tx() {
-    macro_rules! aw {
-        ($e:expr) => {
-            tokio_test::block_on($e)
-        };
-      };
-
-    let tx = run_rpc_tx("https://rpc-futurenet.stellar.org:443/soroban/rpc", "SC7PJSRS6JKKHG7W3U6LHF7V3TXAEYS34GAB3EK5FWVS6DU4SEHBM3I2");
-    println!("{:?}", aw!(tx));
-
-    
 }
-*/
-
-
-

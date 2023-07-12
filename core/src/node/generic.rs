@@ -5,7 +5,7 @@ use tokio::time::{sleep, Duration};
 use async_trait::async_trait;
 
 use crate::{
-    rpc::NodeStellarRpcClient, 
+    rpc::{NodeStellarRpcClient, SorobanRpc}, 
     config::soroban::SorobanConfig, 
     messaging::{LockedInBridge, EventLogger, TryIntoMessage}, Node
 };
@@ -68,9 +68,9 @@ impl<'a, I: std::marker::Send> EventProcessor<I> for Node<'a, I>
         let payload = event.serialize_to_bytes(); // TODO: probably remove byte serialization/deserialization.
         
         // broadcast payload
-        let tx = self.stellar_rpc.build_tx(payload).await;
+        let tx = self.build_tx(payload).await;
         
-        self.stellar_rpc.send_transaction(tx).await
+        self.send_transaction(tx).await
     }
 
     async fn process_event_queue(&self) {

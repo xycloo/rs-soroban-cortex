@@ -33,48 +33,85 @@ pub struct Node<'a, I>
     /// Configurations
     pub config: Config<'a>,
 
-    // Ethereum event logger, supplied by implementor.
-    #[cfg(feature = "bridge")]
-    pub eth_listener: Box<dyn EventLogger<I>>,
+    /// Ethereum event logger, supplied by implementor.
+    pub eth_listener: Option<Box<dyn EventLogger<I>>>,
 
 }
 
-impl<'a, I: Send> Node<'a, I>
-    where I: TryIntoMessage
 
+// TODO: rename new(s) to new_bridge and new_soroban_stream
+
+#[cfg(feature = "full")]
+impl <'a, I: Send> Node<'a, I> 
+    where I: TryIntoMessage 
+    
     {
-
+    
     /// Sets the initial parameters of the node and configurates the object.    
-    pub fn new(soroban_config: SorobanConfig<'a>, node_config: NodeConfiguration, listener: impl EventLogger<I> + 'static) -> Self {
+    pub fn new(soroban_config: SorobanConfig<'a>, node_config: NodeConfiguration<'a>, listener: impl EventLogger<I> + 'static) -> Self {
         let stellar_rpc_client = Client::new(soroban_config.rpc_endpoint).unwrap(); // todo: error handling
 
-        let config = Config::new(soroban_config, node_config);
+        let config = Config::new(Some(soroban_config), Some(node_config));
 
-        Self { in_events_queue: Default::default(), stellar_rpc_client, config, eth_listener: Box::new(listener) }
+        Self { 
+            in_events_queue: Default::default(), 
+            stellar_rpc_client, 
+            config, 
+            eth_listener: Some(Box::new(listener)) 
+        }
     }
 
     /// Runs the node.
     pub async fn run(&self) {
         info!("[+] starting service");
 
-        let mut topin = self.eth_listener.read_stream(Duration::from_secs(1)).await;
+        let mut topin = self.eth_listener.as_ref().unwrap().read_stream(Duration::from_secs(1)).await;
         
         loop {
-            if cfg!(feature = "bridge") {
-                self.read_stream_next(
-                    Box::pin(topin.next())
-                ).await;
+            self.read_stream_next(
+                Box::pin(topin.next())
+            ).await;
 
-                self.process_event_queue().await;
-            }
+            self.process_event_queue().await;
 
-            if cfg!(feature = "soroban_events_stream") {
+        };
+    }
 
-            }
+
+    }
+
+#[cfg(feature = "stream_only")]
+impl <'a> Node<'a, ()>     
+    {
+    
+    /// Sets the initial parameters of the node and configurates the object.    
+    pub fn new(soroban_config: SorobanConfig<'a>) -> Self {
+        let stellar_rpc_client = Client::new(soroban_config.rpc_endpoint).unwrap(); // todo: error handling
+
+        let config = Config::new(Some(soroban_config), None);
+
+        Self { 
+            in_events_queue: Default::default(), 
+            stellar_rpc_client, 
+            config, 
+            eth_listener: None
         }
     }
 
-}
+    /// Runs the node.
+    pub async fn run(&self) {
+        info!("[+] starting service");
+
+        let soroban_stream = self.stream(Duration::from_secs(1));
+        futures::pin_mut!(soroban_stream);
+
+        loop {
+            println!("{:?}", soroban_stream.next().await)
+        };
+    }
+
+
+    }
 
 
 
