@@ -102,7 +102,7 @@ impl <'a> Node<'a, ()>
     pub async fn run(&self) {
         info!("[+] starting service");
 
-        let soroban_stream = self.stream(Duration::from_secs(1));
+        let soroban_stream = self.stream(self.config.soroban().poll_interval);
         futures::pin_mut!(soroban_stream);
 
         loop {

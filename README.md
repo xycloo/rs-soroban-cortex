@@ -1,9 +1,11 @@
-# Multichain Soroban Bridge
+# Soroban Cortex
 
-### Node and contracts to make atomic trustless swaps from any smart contracts chain to Soroban.
+### Get started with building multichain bridges and events ingestors. 
 
-This repository is not meant to be directly a module
+A collection of crates and utils to build and run your own network of nodes on Soroban. This repository is also home of two implementations around `rs-soroban-cortex`:
+- Ethereum to Soroban atomic swaps.
+- Soroban events sourcing node.
 
-## Design
+# Design
 
 

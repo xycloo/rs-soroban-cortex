@@ -69,8 +69,6 @@ pub async fn get_events(
 impl<'a> Node<'a, ()>    
     {
         pub fn stream(&self, poll_interval:Duration) -> impl Stream<Item = std::vec::Vec<soroban_cli::rpc::Event>> + '_{
-            let client = &self.stellar_rpc_client;
-            
             let configs = self.config.soroban();
             let current_ledger = configs.starting_ledger;
             
@@ -89,7 +87,10 @@ impl<'a> Node<'a, ()>
                     None
                 ).await.unwrap(); // TODO: error handling.
 
-                Some((items.events, items.latest_ledger + 1))
+                Some((items.events, items.latest_ledger)) // the core should always fecth for latest ledger 
+                                                          // without caring to filter out duplicates.
+                                                          // Duplicate filtering should take place when building
+                                                          // out the database.
             })
         }
     }

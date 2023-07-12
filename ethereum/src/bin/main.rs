@@ -30,13 +30,6 @@ struct Args {
 }
 
 fn main() {
-    let listener = EthEventLogger::new(contract_address);
-    let node = Node::<LogWrap>::new(
-        node_secret, 
-        out_contract, 
-        stellar_rpc_endpoint, 
-        txload_function, 
-        network_passphrase, 
-        listener
-    );
+    let contract_address = [0;20];
+    let listener = EthEventLogger::new(contract_address.as_slice());
 }
