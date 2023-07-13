@@ -1,6 +1,6 @@
 use web3::types::{Filter};
 use async_trait::async_trait;
-use multichain_core::EventLogger;
+use soroban_cortex_core::EventLogger;
 use web3::futures::StreamExt;
 use std::pin::Pin;
 

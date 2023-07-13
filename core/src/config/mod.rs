@@ -1,16 +1,16 @@
-use crate::{SorobanConfig, NodeConfiguration, Node};
+use crate::{SorobanEventsSteamConfig, NodeConfiguration, Node};
 
-pub mod generic;
-pub mod soroban;
+pub mod bridge;
+pub mod soroban_events_stream;
 
 
 pub struct Config<'a> {
-    soroban: Option<SorobanConfig<'a>>,
+    soroban: Option<SorobanEventsSteamConfig<'a>>,
     node: Option<NodeConfiguration<'a>>
 }
 
 impl<'a> Config<'a> {
-    pub fn new(soroban: Option<SorobanConfig<'a>>, node: Option<NodeConfiguration<'a>>) -> Self {
+    pub fn new(soroban: Option<SorobanEventsSteamConfig<'a>>, node: Option<NodeConfiguration<'a>>) -> Self {
         
         Self { 
             soroban, 
@@ -18,7 +18,7 @@ impl<'a> Config<'a> {
         }
     }
 
-    pub fn soroban(&self) -> &SorobanConfig {
+    pub fn soroban(&self) -> &SorobanEventsSteamConfig {
         self.soroban.as_ref().unwrap_or_else(|| panic!("Requesting a field that should not be used for your features, check your feature configurations."))
 
     }

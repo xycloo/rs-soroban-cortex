@@ -1,13 +1,13 @@
-use futures::{Stream, StreamExt, stream::Next};
+use futures::{Stream, stream::Next};
 use log::{info, debug};
-use std::{sync::{Arc, Mutex}, pin::Pin};
+use std::{pin::Pin};
 use tokio::time::{sleep, Duration};
 use async_trait::async_trait;
 
 use crate::{
-    rpc::{NodeStellarRpcClient, SorobanRpc}, 
-    config::soroban::SorobanConfig, 
-    messaging::{LockedInBridge, EventLogger, TryIntoMessage}, Node
+    rpc::{SorobanRpc}, 
+    
+    messaging::{LockedInBridge, TryIntoMessage}, Node
 };
 
 use super::EventProcessor;

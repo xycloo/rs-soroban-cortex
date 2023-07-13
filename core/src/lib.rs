@@ -19,9 +19,8 @@ pub mod rpc;
 pub mod messaging;
 pub mod config;
 pub mod utils;
-pub mod chains_test_types;
 
 pub use node::Node;
 pub use messaging::{NodeError, TryIntoMessage, EventLogger};
-pub use config::soroban::SorobanConfig;
-pub use config::generic::NodeConfiguration;
+pub use config::soroban_events_stream::SorobanEventsSteamConfig;
+pub use config::bridge::NodeConfiguration;

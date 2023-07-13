@@ -1,4 +1,4 @@
-use multichain_core::{TryIntoMessage, NodeError};
+use soroban_cortex_core::{TryIntoMessage, NodeError};
 use web3::types::Log;
 pub struct LogWrap(pub Result<Log, web3::Error>);
 

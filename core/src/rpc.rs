@@ -4,11 +4,11 @@ use async_trait::async_trait;
 use soroban_cli::{rpc::Client};
 use soroban_env_host::{xdr::{ScBytes, ScVal, Transaction}, I64Val};
 use log::{error, info};
-use crate::{config::soroban::SorobanConfig, utils::build_invoke_contract_tx, Node};
+use crate::{SorobanEventsSteamConfig, utils::build_invoke_contract_tx, Node};
 
 /// Client wrapper
 pub struct NodeStellarRpcClient<'a> {
-    config: SorobanConfig<'a>,
+    config: SorobanEventsSteamConfig<'a>,
     
     /// RPC client
     pub client: Client,

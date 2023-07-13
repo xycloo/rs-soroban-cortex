@@ -5,8 +5,8 @@ members = [
     "soroban",
     "ethereum",
     "test_contracts/simple_log",
-    "tests"
-    ]
+    "examples"
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -53,4 +53,4 @@ chrono = "0.4.26"
 async-trait = "0.1.68"
 clap = "4.3.10"
 stellar-xdr = { version = "0.0.17" }
-multichain-core = { path = "./core/", default-features = false }
+soroban-cortex-core = { path = "./core/", default-features = false }

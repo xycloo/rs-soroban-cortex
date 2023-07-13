@@ -3,13 +3,13 @@ use futures::{Stream, StreamExt, stream::Next};
 use log::{info, debug};
 use soroban_cli::rpc::Client;
 use std::{sync::{Arc, Mutex}, pin::Pin};
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration};
 use async_trait::async_trait;
 
 use crate::{
-    rpc::NodeStellarRpcClient, 
-    config::{soroban::SorobanConfig, Config}, 
-    messaging::{LockedInBridge, EventLogger, TryIntoMessage, Bytes32}, NodeError, NodeConfiguration
+    config::Config,
+    SorobanEventsSteamConfig, 
+    messaging::{LockedInBridge, EventLogger, TryIntoMessage, Bytes32}, NodeConfiguration
 };
 
 
@@ -48,7 +48,7 @@ impl <'a, I: Send> Node<'a, I>
     {
     
     /// Sets the initial parameters of the node and configurates the object.    
-    pub fn new(soroban_config: SorobanConfig<'a>, node_config: NodeConfiguration<'a>, listener: impl EventLogger<I> + 'static) -> Self {
+    pub fn new(soroban_config: SorobanEventsSteamConfig<'a>, node_config: NodeConfiguration<'a>, listener: impl EventLogger<I> + 'static) -> Self {
         let stellar_rpc_client = Client::new(soroban_config.rpc_endpoint).unwrap(); // todo: error handling
 
         let config = Config::new(Some(soroban_config), Some(node_config));
@@ -85,7 +85,7 @@ impl <'a> Node<'a, ()>
     {
     
     /// Sets the initial parameters of the node and configurates the object.    
-    pub fn new(soroban_config: SorobanConfig<'a>) -> Self {
+    pub fn new(soroban_config: SorobanEventsSteamConfig<'a>) -> Self {
         let stellar_rpc_client = Client::new(soroban_config.rpc_endpoint).unwrap(); // todo: error handling
 
         let config = Config::new(Some(soroban_config), None);
@@ -139,7 +139,7 @@ pub struct SorobanEvent {
 
 
 #[cfg(feature = "bridge")]
-mod generic;
+mod bridge;
 
 #[cfg(feature = "soroban_events_stream")]
-mod soroban_stream;
+mod soroban_events_stream;

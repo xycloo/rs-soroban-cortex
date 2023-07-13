@@ -1,5 +1,5 @@
 [package]
-name = "ethereum"
+name = "ethereum-bridge"
 version = "0.1.0"
 edition = "2021"
 
@@ -20,4 +20,4 @@ chrono = { workspace = true }
 async-trait = { workspace = true }
 clap = { workspace = true }
 
-multichain-core = { workspace = true }
+soroban-cortex-core = { workspace = true }

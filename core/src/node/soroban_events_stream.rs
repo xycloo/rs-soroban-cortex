@@ -1,18 +1,13 @@
-use futures::{Stream, StreamExt, stream::Next, TryStreamExt, TryStream};
+use futures::{Stream};
 use log::{info, debug};
-use soroban_cli::{rpc::{EventStart, EventType, Event, GetEventsResponse, Client}, commands::contract::Error};
-use std::{sync::{Arc, Mutex}, pin::Pin};
-use tokio::time::{sleep, Duration};
-use async_trait::async_trait;
+use soroban_cli::rpc::{EventStart, EventType, GetEventsResponse};
+use tokio::time::{Duration};
 use jsonrpsee_core::{params::ObjectParams, client::ClientT};
 
 use crate::{
-    rpc::NodeStellarRpcClient, 
-    config::soroban::SorobanConfig, 
-    messaging::{LockedInBridge, EventLogger, TryIntoMessage}, Node, NodeError
+    Node
 };
 use jsonrpsee_http_client::{HeaderMap, HttpClient, HttpClientBuilder};
-use super::{SorobanEvent};
 
 const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 
