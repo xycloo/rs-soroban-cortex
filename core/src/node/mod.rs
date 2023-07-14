@@ -12,6 +12,23 @@ use crate::{
     messaging::{LockedInBridge, EventLogger, TryIntoMessage, Bytes32}, NodeConfiguration
 };
 
+pub struct BridgeMessageNode<'a, I> 
+    where I: std::marker::Send
+    {
+
+    /// Queued events.
+    in_events_queue: Arc<Mutex<Vec<LockedInBridge>>>,
+
+    pub stellar_rpc_client: Client,
+
+    /// Configuration
+    pub config: NodeConfiguration<'a>,
+
+    /// Event logger of the chain initiating the swap, supplied by implementor.
+    pub initiator_listener: Box<dyn EventLogger<I>>,
+    
+    }
+
 
 /// Default node object.
 /// This kind of node is designed to broadcast messages from one generic chain to soroban

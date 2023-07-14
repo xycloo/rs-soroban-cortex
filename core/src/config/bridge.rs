@@ -11,6 +11,7 @@ pub struct NodeConfiguration<'a> {
     error_logging_mode: ErrorMode,
 
     // Soroban
+    pub rpc_endpoint: &'a str,
     pub aggregator_contract_id: Bytes32,
     pub txload_function: &'a str,
     pub key: Keypair,
