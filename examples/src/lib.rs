@@ -5,10 +5,10 @@ pub mod stream_only {
     use soroban_cortex_core::{SorobanEventsSteamConfig, Node};
 
     pub async fn soroban_events_stream_hello_contract() {
-        let rpc_url = "https://rpc-futurenet.stellar.org:443/soroban/rpc";
-        let contract_id = "bda1498d887f46c30cef17a046e2d96febad8a7e400d1335891f415ce5559577";
+        let rpc_url = "https://rpc-futurenet.stellar.org:443/";
+        let contract_id = "116668071f9c9669bf451851a960c9d55a20964bbd2438d08adb59f21b6ffe6b";
                 
-        let soroban_config = SorobanEventsSteamConfig::new(rpc_url, 60729, contract_id, None, Duration::from_secs(3));
+        let soroban_config = SorobanEventsSteamConfig::new(rpc_url, 78780, contract_id, None, Duration::from_secs(3));
 
         let node = Node::<'_, ()>::new(soroban_config);
 

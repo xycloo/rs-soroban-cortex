@@ -125,4 +125,3 @@ impl<'a, I> SorobanRpc for BridgeMessageNode<'a, I>
         }
     }
 }
-

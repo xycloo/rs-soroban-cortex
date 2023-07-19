@@ -1,9 +1,9 @@
 use ed25519_dalek::Keypair;
 use soroban_cli::commands::config::secret::Secret;
 use soroban_env_host::xdr::{
-    self, HostFunction, HostFunctionArgs, InvokeHostFunctionOp,
+    self, HostFunction, InvokeHostFunctionOp,
     Memo, MuxedAccount, OperationBody, Preconditions,
-    ScVec, SequenceNumber, Transaction, TransactionExt, Uint256, VecM,
+    ScVec, SequenceNumber, Transaction, TransactionExt, Uint256, VecM, Operation,
 };
 
 pub fn build_key_from_secret(secret: &str) -> Keypair {
@@ -20,24 +20,21 @@ pub fn build_invoke_contract_tx(
     fee: u32,
     key: &ed25519_dalek::Keypair,
 ) -> Transaction {
-    let op = xdr::Operation {
+    let op = Operation {
         source_account: None,
         body: OperationBody::InvokeHostFunction(InvokeHostFunctionOp {
-            functions: vec![HostFunction {
-                args: HostFunctionArgs::InvokeContract(parameters),
-                auth: VecM::default(),
-            }]
-            .try_into().unwrap(),
+            host_function: HostFunction::InvokeContract(parameters),
+            auth: VecM::default(),
         }),
     };
-
+    
     Transaction {
         source_account: MuxedAccount::Ed25519(Uint256(key.public.to_bytes())),
         fee,
         seq_num: SequenceNumber(sequence),
         cond: Preconditions::None,
         memo: Memo::None,
-        operations: vec![op].try_into().unwrap(),
+        operations: vec![op].try_into().unwrap_or_else(|_| panic!("invalid parameters")),
         ext: TransactionExt::V0,
     }
 }

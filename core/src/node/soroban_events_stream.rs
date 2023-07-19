@@ -22,6 +22,45 @@ fn client(url: &str) -> HttpClient {
     
 }
 
+async fn get_events(
+    rpc_url: &str,
+    start: EventStart,
+    event_type: Option<EventType>,
+    contract_ids: &[String],
+    topics: Option<&[String]>,
+    limit: Option<usize>,
+) -> Result<GetEventsResponse, serde_json::Error> {
+    let mut filters = serde_json::Map::new();
+
+    event_type
+        .and_then(|t| match t {
+            EventType::All => None, // all is the default, so avoid incl. the param
+            EventType::Contract => Some("contract"),
+            EventType::System => Some("system"),
+        })
+        .map(|t| filters.insert("type".to_string(), t.into()));
+
+    filters.insert("topics".to_string(), topics.into());
+    filters.insert("contractIds".to_string(), contract_ids.into());
+
+    let mut pagination = serde_json::Map::new();
+    if let Some(limit) = limit {
+        pagination.insert("limit".to_string(), limit.into());
+    }
+
+    let mut oparams = ObjectParams::new();
+    match start {
+        EventStart::Ledger(l) => oparams.insert("startLedger", l.to_string())?,
+        EventStart::Cursor(c) => {
+            pagination.insert("cursor".to_string(), c.into());
+        }
+    };
+    oparams.insert("filters", vec![filters])?;
+    oparams.insert("pagination", pagination)?;
+
+    Ok(client(rpc_url).request("getEvents", oparams).await.unwrap())
+}
+/*
 pub async fn get_events(
     rpc_url: &str,
     start: EventStart,
@@ -60,6 +99,7 @@ pub async fn get_events(
 
     Ok(client(rpc_url).request("getEvents", oparams).await.unwrap()) // TODO: error handling
 }
+*/
 
 impl<'a> Node<'a, ()>    
     {

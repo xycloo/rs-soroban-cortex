@@ -27,18 +27,16 @@ lto = true
 
 
 [workspace.dependencies.soroban-sdk]
-version = "0.8.4"
+version = "0.9.2"
 
 
 [workspace.dependencies.bytes]
 version = "1"
 
-
 [workspace.dependencies.soroban-env-host]
-version = "0.0.16"
+version = "0.0.17"
 git = "https://github.com/stellar/rs-soroban-env"
-rev = "0c0cae6fa22b751e7fd95d7ce7556ac6d7b7010e"
-
+rev = "400d806387140553e4e685d232deb3a807ec0e36"
 
 [workspace.dependencies]
 stellar-strkey = "0.0.7"
