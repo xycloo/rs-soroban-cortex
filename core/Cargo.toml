@@ -22,7 +22,7 @@ jsonrpsee-core = "0.18.2"
 serde_json = "1.0"
 serde = "1.0.82"
 serde-aux = "4.1.2"
-soroban-cli= { git = "https://github.com/stellar/soroban-tools/", rev="6bdd01a190e30805955fba11c60eed4aa452387c"}
+soroban-cli= { git = "https://github.com/stellar/soroban-tools/", rev="b5e8586344ab52c0a1b8988b44b0c4e516a473ce"}
 ed25519-dalek = "1.0.1"
 
 
