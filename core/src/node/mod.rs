@@ -12,7 +12,7 @@ use crate::{
     messaging::{LockedInBridge, EventLogger, TryIntoMessage, Bytes32}, NodeConfiguration
 };
 
-pub struct BridgeMessageNode<'a, I> 
+pub struct BridgeMessage<'a, I> 
     where I: std::marker::Send
     {
 
@@ -30,51 +30,30 @@ pub struct BridgeMessageNode<'a, I>
     }
 
 
-/// Default node object.
-/// This kind of node is designed to broadcast messages from one generic chain to soroban
-/// while listening for callback events on Soroban to execute transactions on the generic chain.
-/// [`I`] is the type that is streamed from the events logger the implementor provides.
-/// ['I'] must implement [`TryIntoMessage`] for it to be serialized to bytes.
-pub struct Node<'a, I> 
-    where I: std::marker::Send
-    {
-
-    /// Queued events.
-    in_events_queue: Arc<Mutex<Vec<LockedInBridge>>>,
-
-    // TODO: maybe remove this wrapper and make it a trait would make it easier
-    // for error logs reporting and 
-    /// Wrapper around the rpc client to interact with Soroban.
+pub struct EventsStream<'a> {
     pub stellar_rpc_client: Client,
-
-    /// Configurations
-    pub config: Config<'a>,
-
-    /// Ethereum event logger, supplied by implementor.
-    pub eth_listener: Option<Box<dyn EventLogger<I>>>,
-
+    pub config: SorobanEventsSteamConfig<'a>
 }
 
 
 // TODO: rename new(s) to new_bridge and new_soroban_stream
 
-#[cfg(feature = "full")]
-impl <'a, I: Send> Node<'a, I> 
+#[cfg(feature = "packaged")]
+impl <'a, I: Send> BridgeMessage<'a, I> 
     where I: TryIntoMessage 
     
     {
     
     /// Sets the initial parameters of the node and configurates the object.    
-    pub fn new(soroban_config: SorobanEventsSteamConfig<'a>, node_config: NodeConfiguration<'a>, listener: impl EventLogger<I> + 'static) -> Self {
-        let stellar_rpc_client = Client::new(soroban_config.rpc_endpoint).unwrap(); // todo: error handling
+    pub fn new(node_config: NodeConfiguration<'a>, listener: impl EventLogger<I> + 'static) -> Self {
+        let stellar_rpc_client = Client::new(node_config.rpc_endpoint).unwrap(); // todo: error handling
 
-        let config = Config::new(Some(soroban_config), Some(node_config));
-
+        
         Self { 
             in_events_queue: Default::default(), 
             stellar_rpc_client, 
-            config, 
-            eth_listener: Some(Box::new(listener)) 
+            config: node_config, 
+            initiator_listener: Box::new(listener) 
         }
     }
 
@@ -82,36 +61,33 @@ impl <'a, I: Send> Node<'a, I>
     pub async fn run(&self) {
         info!("[+] starting service");
 
-        let mut topin = self.eth_listener.as_ref().unwrap().read_stream(Duration::from_secs(1)).await;
+        let mut pinned = self.initiator_listener.as_ref().read_stream(
+            Duration::from_secs(1)
+        ).await;
         
         loop {
             self.read_stream_next(
-                Box::pin(topin.next())
+                Box::pin(pinned.next())
             ).await;
 
             self.process_event_queue().await;
 
         };
     }
-
-
     }
 
-#[cfg(feature = "stream_only")]
-impl <'a> Node<'a, ()>     
+
+#[cfg(feature = "packaged")]
+impl <'a> EventsStream<'a>  
     {
     
     /// Sets the initial parameters of the node and configurates the object.    
-    pub fn new(soroban_config: SorobanEventsSteamConfig<'a>) -> Self {
-        let stellar_rpc_client = Client::new(soroban_config.rpc_endpoint).unwrap(); // todo: error handling
-
-        let config = Config::new(Some(soroban_config), None);
+    pub fn new(config: SorobanEventsSteamConfig<'a>) -> Self {
+        let stellar_rpc_client = Client::new(config.rpc_endpoint).unwrap(); // todo: error handling
 
         Self { 
-            in_events_queue: Default::default(), 
             stellar_rpc_client, 
             config, 
-            eth_listener: None
         }
     }
 
@@ -119,7 +95,7 @@ impl <'a> Node<'a, ()>
     pub async fn run(&self) {
         info!("[+] starting service");
 
-        let soroban_stream = self.stream(self.config.soroban().poll_interval);
+        let soroban_stream = self.stream(self.config.poll_interval);
         futures::pin_mut!(soroban_stream);
 
         loop {
@@ -133,7 +109,7 @@ impl <'a> Node<'a, ()>
 
 
 /// Describes the behaviour of processing an events stream.
-#[cfg(feature = "bridge")]
+// #[cfg(feature = "bridge")]
 #[async_trait]
 pub trait EventProcessor<I> {
     /// Awaits for the stream to be updated with a new item, when it is, deserialize the event and push it to the queue.
@@ -147,7 +123,7 @@ pub trait EventProcessor<I> {
 }
 
 
-#[cfg(feature = "soroban_events_stream")]
+// #[cfg(feature = "soroban_events_stream")]
 pub struct SorobanEvent {
     contract_id: Bytes32,
     topics: Vec<Bytes>,
@@ -155,8 +131,10 @@ pub struct SorobanEvent {
 }
 
 
-#[cfg(feature = "bridge")]
+// #[cfg(feature = "bridge")]
 mod bridge;
 
-#[cfg(feature = "soroban_events_stream")]
-mod soroban_events_stream;
+// #[cfg(feature = "soroban_events_stream")]
+mod soroban;
+
+// mod soroban_state_watcher;

@@ -1,7 +1,8 @@
-use crate::{SorobanEventsSteamConfig, NodeConfiguration, Node};
+use crate::{SorobanEventsSteamConfig, NodeConfiguration};
 
 pub mod bridge;
 pub mod soroban_events_stream;
+pub mod state_watcher;
 
 
 pub struct Config<'a> {

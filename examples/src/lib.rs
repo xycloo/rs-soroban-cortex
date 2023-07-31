@@ -1,8 +1,10 @@
+use stellar_xdr::next::{ReadXdr, WriteXdr};
 
-pub mod stream_only {
+
+pub mod stream_only_packaged {
     use std::time::Duration;
 
-    use soroban_cortex_core::{SorobanEventsSteamConfig, Node};
+    use soroban_cortex_core::{SorobanEventsSteamConfig, EventsStream};
 
     pub async fn soroban_events_stream_hello_contract() {
         let rpc_url = "https://rpc-futurenet.stellar.org:443/";
@@ -10,8 +12,24 @@ pub mod stream_only {
                 
         let soroban_config = SorobanEventsSteamConfig::new(rpc_url, 78780, contract_id, None, Duration::from_secs(3));
 
-        let node = Node::<'_, ()>::new(soroban_config);
+        let node = EventsStream::new(soroban_config);
 
         node.run().await
     }
+}
+
+
+
+pub mod unpackaged;
+pub mod unpackaged_dynamic;
+
+#[test]
+fn build_xdr() {
+    //let wasm_hash = stellar_xdr::next::Hash::from_xdr_base64("N6IjTWyKonr2NcLiaSg/EG1xYYuROOo08JWtcRDYgJc=");
+    
+    //println!("{:?}", wasm_hash.unwrap().to_string());
+
+    let i = stellar_xdr::next::ScVal::LedgerKeyContractInstance;
+    println!("{}", i.to_xdr_base64().unwrap());
+
 }

@@ -20,7 +20,9 @@ pub mod messaging;
 pub mod config;
 pub mod utils;
 
-pub use node::Node;
+// pub use node::Node;
+
+pub use node::{EventsStream, BridgeMessage};
 pub use messaging::{NodeError, TryIntoMessage, EventLogger};
 pub use config::soroban_events_stream::SorobanEventsSteamConfig;
 pub use config::bridge::NodeConfiguration;

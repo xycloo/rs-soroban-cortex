@@ -15,7 +15,7 @@ Ethereum -> Soroban workflow:
 */
 
 use ethereum_bridge::{logger::EthEventLogger, conversions::LogWrap};
-use soroban_cortex_core::{Node, EventLogger};
+use soroban_cortex_core::{BridgeMessage, EventLogger};
 
 use clap::Parser;
 

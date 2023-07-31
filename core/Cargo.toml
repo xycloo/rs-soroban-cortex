@@ -30,21 +30,24 @@ ed25519-dalek = "1.0.1"
 
 # By default the core serves to bridge a generic chain to soroban. 
 
-default = ["full"]
+default = ["packaged"]
+
+# Feature for having nodes with the new and run implementations
+packaged = []
 
 # Feature for nodes that want full bridge and soroban rpc functionality.
-full = ["bridge", "soroban_events_stream"]
+# full = ["bridge", "soroban_events_stream"]
 
 # Feature for nodes that only want to listen to events and return a stream
-stream_only = ["soroban_events_stream"]
+# stream_only = ["soroban_events_stream"]
 
 # To only have a node that listens for events, import core without `build`.
-bridge = []
+# bridge = []
 
 
 # Enables the node to listen for Soroban events.
 # Some nodes might want this deactivated to keep their functionality only 
 # to bridge a message from a generic chain to Soroban without any callback.
-soroban_events_stream = []
+# soroban_events_stream = []
 
 
