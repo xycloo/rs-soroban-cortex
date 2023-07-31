@@ -35,7 +35,7 @@ pub async fn soroban_events_stream_hello_contract() {
             let active_contracts = active_contracts.lock().await;
             let active_contract_ids: Vec<String> = active_contracts.iter().cloned().collect();
             drop(active_contracts); // Release the lock before creating the stream
-            let soroban_config = SorobanEventsSteamConfig::new(rpc_url, 78780, active_contract_ids.last().unwrap(), None, Duration::from_secs(3));
+            let soroban_config = SorobanEventsSteamConfig::new(rpc_url, 165564, active_contract_ids.last().unwrap(), None, Duration::from_secs(3));
             let node = EventsStream::new(soroban_config);
             let mut stream = node.stream(Duration::from_secs(4));
 

@@ -1,5 +1,7 @@
 use stellar_xdr::next::{ReadXdr, WriteXdr};
 
+pub const LOG_CONTRACT: &str = "3fcfe95e48766b97a9f55a8bfa58fd79b62c7c4a23fb29738cd2e7cece27a281";
+pub const STARTING_LEDGER: u32 = 165564;
 
 pub mod stream_only_packaged {
     use std::time::Duration;
