@@ -2,11 +2,11 @@
 resolver = "2"
 members = [ 
     "core",
-    "soroban",
-    "ethereum",
-    "test_contracts/simple_log",
     "examples",
-    "soroban-events-streaming-node"
+    "soroban-events-streaming-node",
+    "eth-bridge/soroban",
+    "eth-bridge/ethereum",
+    "test_contracts/simple_log",
 ]
 
 [workspace.package]

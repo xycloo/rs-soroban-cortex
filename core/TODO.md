@@ -1,2 +1,0 @@
-- remove rpc wrapper type and directly add client and configs to node
-- read the events stream in an optional save to db method
