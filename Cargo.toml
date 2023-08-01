@@ -4,8 +4,8 @@ members = [
     "core",
     "examples",
     "soroban-events-streaming-node",
-    "eth-bridge/soroban",
-    "eth-bridge/ethereum",
+    "cross-chain-bridge/soroban",
+    "cross-chain-bridge/ethereum",
     "test_contracts/simple_log",
 ]
 
