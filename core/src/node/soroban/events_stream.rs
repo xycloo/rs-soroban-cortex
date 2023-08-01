@@ -63,7 +63,18 @@ async fn get_events(
 
 impl<'a> EventsStream<'a>    
     {
-        pub fn stream(&self, poll_interval:Duration) -> impl Stream<Item = std::vec::Vec<soroban_cli::rpc::Event>> + '_{
+        /// Returns a stream object of soroban events
+        /// according to the object's configurations.
+        /// 
+        /// The events will be checked every ['poll_interval'].
+        pub fn stream(
+            &self, 
+            poll_interval:Duration
+        ) 
+        
+        -> impl Stream<Item = std::vec::Vec<soroban_cli::rpc::Event>> + '_
+        
+        {
             let configs = &self.config;
             let current_ledger = configs.starting_ledger;
             

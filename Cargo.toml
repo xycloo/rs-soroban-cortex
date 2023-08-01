@@ -5,7 +5,8 @@ members = [
     "soroban",
     "ethereum",
     "test_contracts/simple_log",
-    "examples"
+    "examples",
+    "soroban-events-streaming-node"
 ]
 
 [workspace.package]

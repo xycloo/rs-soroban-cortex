@@ -26,3 +26,4 @@ pub use node::{EventsStream, BridgeMessage};
 pub use messaging::{NodeError, TryIntoMessage, EventLogger};
 pub use config::soroban_events_stream::SorobanEventsSteamConfig;
 pub use config::bridge::NodeConfiguration;
+pub use soroban_cli::rpc::Event;

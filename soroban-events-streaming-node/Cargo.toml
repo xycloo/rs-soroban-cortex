@@ -1,0 +1,15 @@
+[package]
+name = "soroban-events-streaming-node"
+edition = "2021"
+authors = ["Tommaso De Ponti <tommaso@xycloo.com>"]
+version = "0.0.1"
+
+
+[dependencies]
+tokio = { workspace = true }
+tokio-test = { workspace = true }
+soroban-cortex-core = { path = "../core/", default-features = false, features = ["packaged"] }
+stellar-xdr = { workspace = true, default-features = false, features=["next", "base64"] }
+stellar-strkey = {workspace = true}
+ed25519-dalek = "1.0.1"
+futures = { workspace = true }
