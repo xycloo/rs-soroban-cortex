@@ -4,6 +4,8 @@
 
 Soroban Cortex is a project that aims to provide stable and secure crates that allow implementors to quickly set up services around Soroban contracts.
 
+> Note: currently the only crate suitable for external usage in the workspace is [`soroban-events-streaming-node`](https://github.com/xycloo/rs-soroban-cortex/tree/main/soroban-events-streaming-node).
+
 # Overview and Features
 
 `rs-soroban-cortex/soroban-cortex-core` offers modules to quickly spin up Soroban-related services. At the time of writing this readme, the crate aims to offer:
