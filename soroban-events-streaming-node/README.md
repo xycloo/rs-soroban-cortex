@@ -18,7 +18,7 @@ use soroban_cortex_core::{SorobanEventsSteamConfig, EventsStream};
 pub use soroban_cortex_core::Event;
 
 
-mod executros {
+mod executors {
     use soroban_cortex_core::Event;
 
     pub fn printer_tracker(event: &Event) {
@@ -53,7 +53,7 @@ async fn main() {
                                // of restructuring.
     );
 
-    let node = EventsNode::new(Box::new(executros::printer_tracker), Duration::from_millis(4500), event_stream_config);
+    let node = EventsNode::new(Box::new(executors::printer_tracker), Duration::from_millis(4500), event_stream_config);
     node.run().await
 }
 
