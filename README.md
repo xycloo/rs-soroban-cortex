@@ -11,6 +11,7 @@ Soroban Cortex is a project that aims to provide stable and secure crates that a
 `rs-soroban-cortex/soroban-cortex-core` offers modules to quickly spin up Soroban-related services. At the time of writing this readme, the crate aims to offer:
 - module(s) to build cross-chain messaging oracles [chain -> Soroban].
 - module(s) to deal with Soroban events.
+- custom ingestion rust crate
 
 ## Cross-chain messaging
 
@@ -19,6 +20,9 @@ Modules and objects regarding the cross-chain messaging functionality are curren
 ## Soroban events streaming
 
 While still a WIP, core provides the `soroban_cortex_core::EventsStream` object to stream events according to the provided stream configuration.
+
+## rs-ingest
+Rust crate for custom ingestion. Check it out at [ingest](https://github.com/xycloo/rs-soroban-cortex/tree/main/ingest)
 
 
 # Next steps

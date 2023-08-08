@@ -17,7 +17,7 @@ Currently, only replaying history is supported, but unbounded ingesting will be 
 
 # Try it out
 
-The crate is a WIP, but you can already start playing around the features it currently offers. For example, check out the (examples)[https://github.com/xycloo/rs-soroban-cortex/tree/main/ingest/src/bin].
+The crate is a WIP, but you can already start playing around the features it currently offers. For example, check out the [examples](https://github.com/xycloo/rs-soroban-cortex/tree/main/ingest/src/bin).
 
 ## Setup
 
