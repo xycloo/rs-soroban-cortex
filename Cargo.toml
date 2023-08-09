@@ -7,8 +7,6 @@ members = [
     "cross-chain-bridge/soroban",
     "cross-chain-bridge/ethereum",
     "test_contracts/simple_log",
-
-    "ingest",
 ]
 
 [workspace.package]
